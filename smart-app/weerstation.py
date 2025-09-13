@@ -9,11 +9,10 @@ Sprint 1: Weerstation (console)
 def fahrenheit(temp_celcius: float) -> float:
     return 32 + 1.8 * temp_celcius
 
-def gevoelstemperatuur(temp_celcius, windsnelheid, luchtvochtigheid):
+def gevoelstemperatuur(temp_celcius: float, windsnelheid: int, luchtvochtigheid: int) -> float:
     return temp_celcius - luchtvochtigheid / 100 * windsnelheid
 
-
-def weerrapport(temp_celcius, windsnelheid, luchtvochtigheid):
+def weerrapport(temp_celcius: float, windsnelheid: int, luchtvochtigheid: int) -> str:
     gt = gevoelstemperatuur(temp_celcius=temp_celcius, windsnelheid=windsnelheid, luchtvochtigheid=luchtvochtigheid)
     
     if gt < 0 and windsnelheid > 10:
@@ -29,11 +28,11 @@ def weerrapport(temp_celcius, windsnelheid, luchtvochtigheid):
     else:
         return "Warm! Airco aan!"
 
-def exit_function():
+def exit_function() -> None:
     print("Aan het stoppen...\n")
     exit(0)
 
-def weerstation():
+def weerstation() -> None:
     temp_per_dag = []
     i = 0
     while i < 7:
