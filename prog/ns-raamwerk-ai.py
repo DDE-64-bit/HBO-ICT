@@ -17,24 +17,96 @@ Voeg commentaar toe om je code toe te lichten.
 
 
 def standaardprijs(afstandKM: int) -> float:
-    if afstandKM > 50:
-        return 15 + 0.60 * afstandKM
+    """
+    Berekent de standaardprijs voor een NS-reis op basis van afstand.
+    
+    Args:
+        afstandKM: Afstand in kilometers
+        
+    Returns:
+        float: Prijs in euro's (0 voor negatieve of nul afstanden)
+        
+    Raises:
+        TypeError: Als afstandKM geen numerieke waarde is
+        ValueError: Als afstandKM onrealistisch hoog is
+    """
+    # Input type validatie
+    if not isinstance(afstandKM, (int, float)):
+        raise TypeError(f"afstandKM moet een numerieke waarde zijn, kreeg: {type(afstandKM).__name__}")
+    
+    # Controleer op NaN of infinity waarden
+    if isinstance(afstandKM, float) and (afstandKM != afstandKM or afstandKM == float('inf') or afstandKM == float('-inf')):
+        raise ValueError(f"afstandKM mag geen NaN of infinity zijn")
+    
+    # Realistische maximum afstand validatie (Nederland is ~300km lang)
+    if afstandKM > 1000:
+        raise ValueError(f"afstandKM te groot (max 1000km), kreeg: {afstandKM}")
+    
+    # Behandel negatieve of nul afstand als speciaal geval (voor backward compatibility)
     if afstandKM <= 0:
-        return 0
+        return 0.0
+    
+    # Bereken prijs volgens NS-tariefstructuur
+    if afstandKM > 50:
+        return 15.0 + 0.60 * afstandKM
     else:
         return 0.80 * afstandKM
 
 
 def ritprijs(leeftijd: int, weekendrit: bool, afstandKM: int) -> float:
-    prijs = standaardprijs(afstandKM)
+    """
+    Berekent de ritprijs inclusief kortingen op basis van leeftijd en weekendrit.
     
+    Args:
+        leeftijd: Leeftijd van de reiziger (0-150 jaar)
+        weekendrit: True als het een weekendrit betreft
+        afstandKM: Afstand in kilometers
+        
+    Returns:
+        float: Prijs in euro's inclusief eventuele kortingen
+        
+    Raises:
+        TypeError: Als parameters niet het juiste type hebben
+        ValueError: Als parameters buiten redelijke ranges vallen
+    """
+    # Input type validatie
+    if not isinstance(leeftijd, int):
+        raise TypeError(f"leeftijd moet een integer zijn, kreeg: {type(leeftijd).__name__}")
+    
+    if not isinstance(weekendrit, bool):
+        raise TypeError(f"weekendrit moet een boolean zijn, kreeg: {type(weekendrit).__name__}")
+    
+    if not isinstance(afstandKM, (int, float)):
+        raise TypeError(f"afstandKM moet een numerieke waarde zijn, kreeg: {type(afstandKM).__name__}")
+    
+    # Input range validatie (redelijke grenzen)
+    if leeftijd < 0 or leeftijd > 150:
+        raise ValueError(f"leeftijd moet tussen 0 en 150 jaar zijn, kreeg: {leeftijd}")
+    
+    # afstandKM validatie wordt gedaan door standaardprijs functie
+    if afstandKM > 1000:
+        raise ValueError(f"afstandKM te groot (max 1000km), kreeg: {afstandKM}")
+    
+    # Bereken basisprijs (standaardprijs handelt negatieve waarden af)
+    try:
+        prijs = standaardprijs(afstandKM)
+    except (TypeError, ValueError) as e:
+        # Re-raise met meer context
+        raise ValueError(f"Fout bij berekenen basisprijs: {str(e)}")
+    
+    # Pas kortingen toe op basis van leeftijd en weekendrit
     if leeftijd < 12 or leeftijd >= 65:
+        # Kinderen onder 12 en senioren 65+ krijgen korting
         if weekendrit:
-            return prijs * 0.65
-        return prijs * 0.7
-    if weekendrit:
-        return prijs * 0.6
-    return prijs
+            return prijs * 0.65  # 35% korting in weekend
+        else:
+            return prijs * 0.7   # 30% korting doordeweeks
+    else:
+        # Volwassenen tussen 12-64 jaar
+        if weekendrit:
+            return prijs * 0.6   # 40% korting in weekend
+        else:
+            return prijs         # Geen korting doordeweeks
 
 
 def development_code():
